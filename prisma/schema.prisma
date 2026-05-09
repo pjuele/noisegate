@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model RawItem {
+  id           String    @id @default(uuid())
+  source       String
+  externalId   String    @unique
+  title        String
+  body         String?
+  url          String
+  publishedAt  DateTime?
+  fetchedAt    DateTime  @default(now())
+  processed    Boolean   @default(false)
+
+  processedItem ProcessedItem?
+
+  @@map("raw_items")
+}
+
+model ProcessedItem {
+  id          String   @id @default(uuid())
+  rawItemId   String   @unique
+  isSignal    Boolean
+  summary     String?
+  processedAt DateTime @default(now())
+
+  rawItem RawItem @relation(fields: [rawItemId], references: [id])
+
+  @@map("processed_items")
+}

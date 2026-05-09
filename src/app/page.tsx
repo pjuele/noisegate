@@ -14,7 +14,7 @@ async function getSignalItems() {
     orderBy: { processedAt: 'desc' },
     include: {
       rawItem: {
-        select: { title: true, url: true, source: true, publishedAt: true },
+        select: { title: true, url: true, source: true, publishedAt: true, fetchedAt: true },
       },
     },
   })
@@ -39,14 +39,24 @@ export default async function Home() {
           <ul className="flex flex-col gap-6">
             {items.map((item) => (
               <li key={item.id} className="border-b border-border pb-6 last:border-0">
-                <a
-                  href={item.rawItem.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-foreground hover:underline"
-                >
-                  {item.rawItem.title}
-                </a>
+                <div className="flex items-start gap-2">
+                  <span className="relative group shrink-0 mt-0.5 cursor-default">
+                    <span>ℹ️</span>
+                    <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-max max-w-xs bg-popover text-popover-foreground text-xs rounded px-2 py-1 shadow-md border border-border whitespace-nowrap z-10">
+                      Captured on {new Date(item.rawItem.fetchedAt).toLocaleDateString('en-CA', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                      })}
+                    </span>
+                  </span>
+                  <a
+                    href={item.rawItem.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {item.rawItem.title}
+                  </a>
+                </div>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                   {item.summary}
                 </p>

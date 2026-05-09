@@ -2,7 +2,7 @@
 
 ## Session Summary
 
-Completed Tasks 5, 6, and 7: Gemini AI filter, cron route + orchestrator, and frontend feed. The full pipeline is working end-to-end locally. Ready to deploy to Vercel.
+POC 1.0 is complete and deployed to Vercel. Full pipeline works end-to-end: daily cron ingests from 3 sources, Gemini classifies signal/noise, frontend feed displays results. Last commits pushed to GitHub, Vercel auto-deployed.
 
 ---
 
@@ -21,54 +21,50 @@ Completed Tasks 5, 6, and 7: Gemini AI filter, cron route + orchestrator, and fr
 - [x] `@prisma/adapter-neon` installed; `src/lib/db.ts` singleton uses `PrismaNeon` adapter
 - [x] `src/lib/ingest/mercopress.ts` — RSS ingest, deduped by URL
 - [x] `src/lib/ingest/auf.ts` — cheerio scraper for `auf.org.uy/mayores/`
-- [x] `src/lib/ingest/montevideo-portal.ts` — cheerio scraper for Montevideo Portal sports (exports `ingestMontevideo`, NOT `ingestMontevideoPortal`)
+- [x] `src/lib/ingest/montevideo-portal.ts` — cheerio scraper for Montevideo Portal sports
 - [x] `tsx` installed as dev dependency
-- [x] Test scripts: `src/scripts/test-mercopress.ts`, `src/scripts/test-scrapers.ts`
+- [x] Test scripts for all pipeline stages
 - [x] `@google/genai` installed
 - [x] `src/lib/ai/filter.ts` — Gemini AI signal/noise filter, uses `gemini-3.1-flash-lite`
-- [x] `src/scripts/test-filter.ts` + `npm run test:filter`
-- [x] `src/lib/process.ts` — orchestrator: fetches unprocessed raw_items, filters each, writes to processed_items, marks raw_item processed
-- [x] `src/app/api/cron/ingest/route.ts` — cron route, protected by `Authorization: Bearer <CRON_SECRET>` header
+- [x] `src/lib/process.ts` — orchestrator
+- [x] `src/app/api/cron/ingest/route.ts` — cron route, protected by `Authorization: Bearer <CRON_SECRET>`
 - [x] `vercel.json` — cron schedule `0 7 * * *`
-- [x] `src/scripts/test-process.ts` + `npm run test:process`
-- [x] `src/app/page.tsx` — frontend feed, React Server Component, queries processed_items where is_signal=true
-- [x] Inter font, dark mode forced via `dark` class on `<html>`
-- [x] 34 raw_items processed: 8 signal, 26 noise, 0 errors
+- [x] `src/app/page.tsx` — frontend feed, dark mode, Inter font, ℹ️ tooltip showing capture date
+- [x] `build` script runs `prisma generate` before `next build` (required for Vercel)
+- [x] README rewritten, boilerplate SVGs removed
+- [x] Deployed to Vercel — cron registered, frontend live
 
 ---
 
 ## Next Up
 
-**Deploy to Vercel**
-1. Push repo to GitHub (new repo)
-2. Connect to Vercel (import project)
-3. Add env vars in Vercel dashboard: `DATABASE_URL`, `GEMINI_API_KEY`, `CRON_SECRET`
-4. Verify cron job appears in Vercel project settings
-5. Manually trigger the cron route once to verify end-to-end in production
+POC 1.0 is done. Let the daily cron accumulate data.
+
+**Potential next phases (from brief):**
+- **POC 1.1** — deduplication/synthesis across sources, structured extraction, additional sources (Portal 180, El Observador/Referí)
+- **POC 2.0** — Uruguay Tracker: player/squad DB, persistent team briefing card, history/timelines
+
+**Deferred known issue:** Montevideo Portal infinite scroll — scraper only captures ~18 initially-loaded articles. Decision: leave as-is, let daily cron build up data organically rather than doing a historical backfill.
 
 ---
 
 ## Key Technical Decisions
 
 - **Prisma 7** — requires driver adapter; using `PrismaNeon` from `@prisma/adapter-neon`
-- **`db.ts`** imports from `@/generated/prisma/client` (not `@/generated/prisma` — no index.ts in Prisma 7 output)
+- **`db.ts`** imports from `@/generated/prisma/client` (not `@/generated/prisma`)
 - **`.env.local`** — `tsx` loads it via `--env-file .env.local` flag
-- **`tsx`** resolves `@/` path aliases from `tsconfig.json` natively
-- **Gemini model: `gemini-3.1-flash-lite`** — `gemini-2.0-flash` has zero free tier quota on this account (limit: 0, not exhausted). `gemini-3.1-flash-lite` has 15 RPM / 250K TPM / 500 RPD free tier.
-- **Cron secret**: Vercel sends it as `Authorization: Bearer <secret>` — route checks `request.headers.get('authorization')`
+- **Gemini model: `gemini-3.1-flash-lite`** — `gemini-2.0-flash` has zero free tier quota on this account (limit: 0). `gemini-3.1-flash-lite` has 15 RPM / 250K TPM / 500 RPD free tier.
+- **Cron secret**: Vercel sends as `Authorization: Bearer <secret>` — route checks `request.headers.get('authorization')`
 - **Montevideo Portal export name**: `ingestMontevideo` (not `ingestMontevideoPortal`)
-- **Font**: Inter via `next/font/google`, variable `--font-inter`, wired directly in `globals.css` body rule (CSS variable chain through Shadcn theme was broken)
+- **Font**: Inter via `next/font/google`, variable `--font-inter`, wired directly in `globals.css` body rule
 - **Dark mode**: forced via `dark` class on `<html>` in layout.tsx
+- **Vercel build**: `prisma generate && next build` — Prisma client is gitignored, must be generated at build time
 
 ## Scraper Details
 
-- **AUF** (`https://www.auf.org.uy/mayores/`) — `article.tarjeta`, title from `hgroup > h3 > a`, date from `hgroup > h4` (format: "10 ABR 2026"), body from first `p`. URL is relative, prepend `https://www.auf.org.uy`. Page is iso-8859-1, decoded via `TextDecoder`.
-- **Montevideo Portal** (`https://www.montevideo.com.uy/categoria/Deportes-94`) — `article.noticia`, title from `.content h2.title`, body from `.content p.text` (often absent), URL from `a.foto` href (absolute). No date in listing — `publishedAt` stored as null.
+- **AUF** (`https://www.auf.org.uy/mayores/`) — `article.tarjeta`, title from `hgroup > h3 > a`, date from `hgroup > h4`, body from first `p`. URL is relative, prepend `https://www.auf.org.uy`. Page is iso-8859-1, decoded via `TextDecoder`.
+- **Montevideo Portal** (`https://www.montevideo.com.uy/categoria/Deportes-94`) — `article.noticia`, title from `.content h2.title`, body from `.content p.text`, URL from `a.foto` href. No date — `publishedAt` stored as null.
 - **MercoPress** — RSS feed, standard `rss-parser` fields.
-
-## Known Issue: Montevideo Portal Infinite Scroll
-
-The current scraper only captures the initially-loaded articles (~18). The page uses infinite scroll. A pagination endpoint exists but is not yet implemented. Deferred post-POC.
 
 ---
 

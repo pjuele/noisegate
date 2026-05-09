@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Uruguay NT — News Feed",
   description: "AI-filtered Uruguay national team news",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { NoiseGateLogo } from '@/components/Logo'
 
 const SOURCE_LABELS: Record<string, string> = {
   mercopress: 'MercoPress',
@@ -27,10 +28,7 @@ export default async function Home() {
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-12">
         <header className="mb-10">
-          <h1 className="text-2xl font-semibold tracking-tight">Uruguay NT</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            AI-filtered news feed — signal only
-          </p>
+          <NoiseGateLogo />
         </header>
 
         {items.length === 0 ? (

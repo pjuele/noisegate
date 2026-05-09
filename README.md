@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Noise Gate
 
-## Getting Started
+AI-powered news filtering pipeline scoped to Uruguay men's national football team.
 
-First, run the development server:
+Ingests articles from 3 sources, classifies each as signal or noise using Gemini, and serves a clean feed of factual updates.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js (App Router, TypeScript) |
+| Database | Neon (Postgres) |
+| ORM | Prisma 7 |
+| AI | Gemini `gemini-3.1-flash-lite` |
+| Hosting | Vercel |
+| Cron | Vercel cron — daily at 07:00 UTC |
+
+## Sources
+
+- **AUF** (`auf.org.uy`) — official Uruguay FA site, scraped with cheerio
+- **Montevideo Portal** (`montevideo.com.uy`) — Uruguayan sports news, scraped with cheerio
+- **MercoPress** (`mercopress.com`) — English-language RSS feed
+
+## Environment Variables
+
+```
+DATABASE_URL      Neon Postgres connection string
+GEMINI_API_KEY    Google AI Studio API key
+CRON_SECRET       Vercel cron secret
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev              # local dev server
+npm run test:ingest      # test MercoPress ingest
+npm run test:scrapers    # test AUF + Montevideo Portal scrapers
+npm run test:filter      # test Gemini filter against DB items
+npm run test:process     # run orchestrator against all unprocessed items
+npx prisma studio        # inspect DB
+npx prisma migrate dev   # run migrations locally
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture
 
-## Learn More
+```
+Sources → Ingest → raw_items → Gemini filter → processed_items → Frontend feed
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The cron route (`/api/cron/ingest`) runs all 3 ingest functions then processes any unprocessed `raw_items` through the AI filter. Signal items appear on the frontend feed.

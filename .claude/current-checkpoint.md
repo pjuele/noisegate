@@ -2,56 +2,51 @@
 
 ## Session Summary
 
-POC 1.0 is complete and deployed to Vercel. Full pipeline works end-to-end: daily cron ingests from 3 sources, Gemini classifies signal/noise, frontend feed displays results. Last commits pushed to GitHub, Vercel auto-deployed.
+POC 1.0 is complete and deployed to Vercel. Cron is confirmed working — ran successfully on May 15, ingested from all 3 sources, processed via Gemini, signal items showing on feed. CRON_SECRET was missing from Vercel env vars (now fixed). Two tasks remain: RSS feed endpoint and Task 8 styling. Starting RSS next.
 
 ---
 
 ## Completed
 
 - [x] Next.js app scaffolded with TypeScript, Tailwind, App Router, `src/` dir, `@/*` import alias
-- [x] Shadcn/ui initialized — Radix + Nova preset (Lucide / Geist), Tailwind v4
-- [x] Node upgraded to v22.22.2 via nvm; `.nvmrc` created with `22`
-- [x] Neon project created (`noisegate`, project ID: `still-butterfly-14962380`)
-- [x] `.env.local` created with `DATABASE_URL` pointing to Neon pooler endpoint
-- [x] Prisma 7 installed and configured (`prisma.config.ts` reads from `.env.local`)
-- [x] DB schema defined: `raw_items` and `processed_items` models
-- [x] Migration `20260506220759_init` applied to Neon — both tables live
-- [x] Prisma client generated at `src/generated/prisma`
-- [x] `CLAUDE.md` created at project root
-- [x] `@prisma/adapter-neon` installed; `src/lib/db.ts` singleton uses `PrismaNeon` adapter
-- [x] `src/lib/ingest/mercopress.ts` — RSS ingest, deduped by URL
-- [x] `src/lib/ingest/auf.ts` — cheerio scraper for `auf.org.uy/mayores/`
-- [x] `src/lib/ingest/montevideo-portal.ts` — cheerio scraper for Montevideo Portal sports
-- [x] `tsx` installed as dev dependency
-- [x] Test scripts for all pipeline stages
-- [x] `@google/genai` installed
-- [x] `src/lib/ai/filter.ts` — Gemini AI signal/noise filter, uses `gemini-3.1-flash-lite`
+- [x] Shadcn/ui initialized — Radix + Nova preset, Tailwind v4
+- [x] Neon DB, Prisma 7, migrations, Prisma client at `src/generated/prisma`
+- [x] `src/lib/db.ts` singleton with `PrismaNeon` adapter
+- [x] All 3 ingest modules (MercoPress RSS, AUF scraper, Montevideo Portal scraper)
+- [x] `src/lib/ai/filter.ts` — Gemini `gemini-3.1-flash-lite` signal/noise filter
 - [x] `src/lib/process.ts` — orchestrator
-- [x] `src/app/api/cron/ingest/route.ts` — cron route, protected by `Authorization: Bearer <CRON_SECRET>`
+- [x] `src/app/api/cron/ingest/route.ts` — cron route, `Authorization: Bearer <CRON_SECRET>`
 - [x] `vercel.json` — cron schedule `0 7 * * *`
-- [x] `src/app/page.tsx` — frontend feed, dark mode, Inter font, ℹ️ tooltip showing capture date
-- [x] `build` script runs `prisma generate` before `next build` (required for Vercel)
+- [x] `src/app/page.tsx` — frontend feed, dark mode, Inter font, ℹ️ capture date tooltip
+- [x] `build` script: `prisma generate && next build`
 - [x] README rewritten, boilerplate SVGs removed
-- [x] Deployed to Vercel — cron registered, frontend live
+- [x] Deployed to Vercel — cron confirmed working
+- [x] Logo components: `NoiseGateSymbol`, `NoiseGateWordmark`, `NoiseGateSlogan`, `NoiseGateLogo` in `src/components/Logo.tsx`
+- [x] `public/favicon.svg` using the symbol mark
+- [x] `CRON_SECRET` added to Vercel environment variables
+
+## Uncommitted Changes
+
+- `src/components/Logo.tsx` — new file
+- `public/favicon.svg` — new file
+- `src/app/page.tsx` — uses `NoiseGateLogo`, capture date tooltip
+- `src/app/layout.tsx` — favicon metadata
+- `src/app/favicon.ico` — deleted
+- `.claude/current-checkpoint.md` — updated
 
 ---
 
 ## Next Up
 
-POC 1.0 is done. Let the daily cron accumulate data.
-
-**Potential next phases (from brief):**
-- **POC 1.1** — deduplication/synthesis across sources, structured extraction, additional sources (Portal 180, El Observador/Referí)
-- **POC 2.0** — Uruguay Tracker: player/squad DB, persistent team briefing card, history/timelines
-
-**Deferred known issue:** Montevideo Portal infinite scroll — scraper only captures ~18 initially-loaded articles. Decision: leave as-is, let daily cron build up data organically rather than doing a historical backfill.
+1. **RSS feed** — `/api/rss` route returning RSS/Atom XML of signal items. ~20 min.
+2. **Task 8 — Styling** — distinct source badge colours, mobile check, optional cards. ~1 hour.
 
 ---
 
 ## Key Technical Decisions
 
 - **Prisma 7** — requires driver adapter; using `PrismaNeon` from `@prisma/adapter-neon`
-- **`db.ts`** imports from `@/generated/prisma/client` (not `@/generated/prisma`)
+- **`db.ts`** imports from `@/generated/prisma/client`
 - **`.env.local`** — `tsx` loads it via `--env-file .env.local` flag
 - **Gemini model: `gemini-3.1-flash-lite`** — `gemini-2.0-flash` has zero free tier quota on this account (limit: 0). `gemini-3.1-flash-lite` has 15 RPM / 250K TPM / 500 RPD free tier.
 - **Cron secret**: Vercel sends as `Authorization: Bearer <secret>` — route checks `request.headers.get('authorization')`
@@ -59,12 +54,13 @@ POC 1.0 is done. Let the daily cron accumulate data.
 - **Font**: Inter via `next/font/google`, variable `--font-inter`, wired directly in `globals.css` body rule
 - **Dark mode**: forced via `dark` class on `<html>` in layout.tsx
 - **Vercel build**: `prisma generate && next build` — Prisma client is gitignored, must be generated at build time
+- **DEP0169 warning**: `url.parse()` deprecation from transitive dep (`rss-parser`). Harmless, can't fix without upstream change.
 
 ## Scraper Details
 
-- **AUF** (`https://www.auf.org.uy/mayores/`) — `article.tarjeta`, title from `hgroup > h3 > a`, date from `hgroup > h4`, body from first `p`. URL is relative, prepend `https://www.auf.org.uy`. Page is iso-8859-1, decoded via `TextDecoder`.
-- **Montevideo Portal** (`https://www.montevideo.com.uy/categoria/Deportes-94`) — `article.noticia`, title from `.content h2.title`, body from `.content p.text`, URL from `a.foto` href. No date — `publishedAt` stored as null.
-- **MercoPress** — RSS feed, standard `rss-parser` fields.
+- **AUF** (`https://www.auf.org.uy/mayores/`) — `article.tarjeta`, title from `hgroup > h3 > a`, date from `hgroup > h4`, body from first `p`. URL relative, prepend `https://www.auf.org.uy`. iso-8859-1 via `TextDecoder`.
+- **Montevideo Portal** (`https://www.montevideo.com.uy/categoria/Deportes-94`) — `article.noticia`, title from `.content h2.title`, body from `.content p.text`, URL from `a.foto` href. No date — `publishedAt` null.
+- **MercoPress** — RSS feed, standard `rss-parser` fields. Uses Node `http` module directly so doesn't appear in Vercel external API log (but works fine).
 
 ---
 
@@ -80,7 +76,7 @@ npm run test:process  # run full orchestrator against all unprocessed items
 
 ---
 
-## Stack Confirmed
+## Stack
 
 | Layer | Choice |
 |---|---|
@@ -103,9 +99,11 @@ npm run test:process  # run full orchestrator against all unprocessed items
 
 ---
 
-## Process Preferences
+## User Preferences
 
-- Always check official docs for library-specific patterns
-- Use `--env-file .env.local` with `tsx` to load env vars
-- Ask before making cascading changes across multiple files
+- Hold position when confident — user argues to get convinced, not to shut down discussion
+- No sycophantic agreement when wrong
+- Terse responses, no trailing summaries
+- Ask before cascading changes across multiple files
 - One decision at a time when unblocking errors
+- No speculation presented as fact

@@ -14,12 +14,19 @@ import type { NavLinkItem } from "./types"
 interface HamburgerMenuProps {
   navLinks?: NavLinkItem[]
   socialLinks?: NavLinkItem[]
+  /**
+   * Extra content rendered at the bottom of the menu, above social links.
+   * Use for app-specific controls that the menu shouldn't know about —
+   * e.g. a language selector: extras={<LangToggle />}
+   */
+  extras?: React.ReactNode
   className?: string
 }
 
 export function HamburgerMenu({
   navLinks = [],
   socialLinks = [],
+  extras,
   className,
 }: HamburgerMenuProps) {
   const [open, setOpen] = useState(false)
@@ -74,6 +81,11 @@ export function HamburgerMenu({
                 {item.label}
               </a>
             ))}
+            {extras && (
+              <div className="pt-4" onClick={() => setOpen(false)}>
+                {extras}
+              </div>
+            )}
           </nav>
 
           {socialLinks.length > 0 && (

@@ -7,7 +7,7 @@ interface NavBarSlotProps {
 
 function NavBarLeft({ children, className }: NavBarSlotProps) {
   return (
-    <div className={cn("flex items-center", className)}>{children}</div>
+    <div className={cn("flex items-center shrink-0", className)}>{children}</div>
   )
 }
 
@@ -19,7 +19,7 @@ function NavBarCenter({ children, className }: NavBarSlotProps) {
 
 function NavBarRight({ children, className }: NavBarSlotProps) {
   return (
-    <div className={cn("flex items-center gap-1", className)}>{children}</div>
+    <div className={cn("flex items-center gap-1 shrink-0", className)}>{children}</div>
   )
 }
 
@@ -37,7 +37,7 @@ export function NavBar({ children, className }: NavBarProps) {
         className
       )}
     >
-      <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between gap-2">
         {children}
       </div>
     </header>

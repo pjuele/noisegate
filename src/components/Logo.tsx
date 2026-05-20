@@ -26,8 +26,6 @@ export function NoiseGateSymbol({ className }: { className?: string }) {
 export function NoiseGateWordmark({ className }: { className?: string }) {
   return (
     <svg
-      width="213"
-      height="64.52"
       viewBox="0 0 211.1025517714703 63.94162455966218"
       className={className}
       aria-label="NoiseGate"

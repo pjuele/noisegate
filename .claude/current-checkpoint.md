@@ -1,79 +1,131 @@
-# Checkpoint — Noise Gate POC 1.0
+# Checkpoint — Noise Gate
 
 ## Session Summary
 
-POC 1.0 is complete. All planned tasks done: pipeline, cron, feed, RSS endpoint, styling. Feed has masonry card layout, coloured source badges, responsive columns. RSS confirmed working in Feedly. One uncommitted change pending: the feed redesign (`page.tsx`).
+Major session: applied pjstyle design system, rebuilt UI to nono.sh aesthetic, added bilingual (EN/ES) support throughout, restructured navigation with three section stubs (world, uruguay, la celeste). All 113 raw items are now processed. Deployed to Vercel on branch `pjstyled`, merged to main.
 
 ---
 
-## Completed
+## Completed This Session
 
-- [x] Next.js app scaffolded with TypeScript, Tailwind, App Router, `src/` dir, `@/*` import alias
-- [x] Shadcn/ui initialized — Radix + Nova preset, Tailwind v4
-- [x] Neon DB, Prisma 7, migrations, Prisma client at `src/generated/prisma`
-- [x] `src/lib/db.ts` singleton with `PrismaNeon` adapter
-- [x] All 3 ingest modules (MercoPress RSS, AUF scraper, Montevideo Portal scraper)
-- [x] `src/lib/ai/filter.ts` — Gemini `gemini-3.1-flash-lite` signal/noise filter
-- [x] `src/lib/process.ts` — orchestrator
-- [x] `src/app/api/cron/ingest/route.ts` — cron route, `Authorization: Bearer <CRON_SECRET>`
-- [x] `vercel.json` — cron schedule `0 7 * * *`
-- [x] `build` script: `prisma generate && next build`
-- [x] README rewritten, boilerplate SVGs removed
-- [x] Deployed to Vercel — cron confirmed working
-- [x] Logo components: `NoiseGateSymbol`, `NoiseGateWordmark`, `NoiseGateSlogan`, `NoiseGateLogo` in `src/components/Logo.tsx`
-- [x] `public/favicon.svg` using the symbol mark
-- [x] `CRON_SECRET` added to Vercel environment variables
-- [x] `src/app/api/rss/route.ts` — RSS 2.0 feed, site URL derived from `request.url` origin, up to 50 items
-- [x] RSS confirmed working in Feedly
-- [x] Feed redesigned: masonry CSS columns (1/2/3), cards, coloured source badges
-
-## Uncommitted Changes
-
-- `src/app/page.tsx` — masonry card layout + coloured badges (commit message ready)
+- [x] Applied `/stylethis` — nono-theme.css, nono components, ThemeProvider, TooltipProvider
+- [x] Fixed font: swapped Inter → Geist (sans) + GeistMono — nono.sh uses GeistMono for everything including display headings
+- [x] Fixed `/stylethis` skill step 3f to explicitly check for `Geist` by name and replace other sans fonts
+- [x] Redesigned feed: nono.sh aesthetic — masonry columns, bordered cards, GeistMono, terracotta accent for source labels
+- [x] Logo: changed `BRAND_COLOR` from hardcoded teal `#84d8ea` to `currentColor` — inherits text colour from context
+- [x] Page title: "Signal" → "celeste" (lowercase, display size, GeistMono)
+- [x] i18n: bilingual EN/ES support throughout
+  - AI prompt updated to return `title_en`, `title_es`, `summary_en`, `summary_es` in one call
+  - Only translates if `is_signal: true` — saves tokens on noise
+  - `processed_items` schema updated: dropped `summary`, added `title_en`, `title_es`, `summary_en`, `summary_es`
+  - `db push --accept-data-loss` used (not `migrate dev` — non-interactive env)
+  - `LangProvider` context wraps the whole app in `layout.tsx`
+  - `LangToggle` (EN/ES buttons) in navbar
+  - `Subtitle` component switches language
+  - `FeedClient` reads from context
+- [x] Navigation: `SiteNav` component with WORLD · URUGUAY · LA CELESTE
+  - "la celeste" → `/` (temporary, TODO comment in SiteNav.tsx)
+  - world (`/world`) and uruguay (`/uruguay`) are stubs
+- [x] RSS feed: unchanged URL `/api/rss`, uses `titleEn` + `summaryEn` — Feedly subscription still works
+- [x] All 113 raw items processed (13 signal, 100 noise)
+- [x] Mobile layout broken — noted, fix next session
 
 ---
 
-## Next Up
+## Current DB State
 
-POC 1.0 is done. Let the daily cron accumulate data.
+- 113 raw items, all processed
+- 13 signal items with bilingual titles and summaries
+- Schema: `processed_items` has `title_en`, `title_es`, `summary_en`, `summary_es`
 
-**Potential next phases (from brief):**
-- **POC 1.1** — deduplication/synthesis across sources, additional sources (Portal 180, El Observador/Referí)
-- **POC 2.0** — Uruguay Tracker: player/squad DB, persistent team briefing card, history/timelines
+---
+
+## Known Issues / TODOs
+
+- **Mobile layout broken** — feed too wide on mobile, fix next session
+- **`/world` stub** — needs implementation (see vision below)
+- **`/uruguay` stub** — needs implementation (see vision below)
+- **`/celeste`** — currently pointing to `/`, needs its own route when implemented
+- **RSS feeds** — currently one feed in EN only; should expand (see vision below)
+
+---
+
+## Vision for Next Phases
+
+### Three-Section Architecture
+
+**`/world`** — General world news, noise filtered by AI
+- New ingest sources (international RSS feeds, not football-specific)
+- Source filter: non-Uruguay-specific sources
+- Language toggle works normally (EN/ES)
+
+**`/uruguay`** — Uruguay news, noise filtered by AI
+- New ingest sources (Uruguayan general news — not football)
+- Source filter: Uruguayan general news sources
+- Language toggle works normally (EN/ES)
+
+**`/celeste`** — Uruguay men's national team (current feed)
+- Move existing feed from `/` to `/celeste`
+- Sources: AUF, Montevideo Portal, MercoPress (current)
+- "la celeste" always stays as the name (Spanish, never translated)
+- Language toggle affects content (summaries/titles), not the section name
+
+### Data Layer Changes Needed
+- New `source` values for world and uruguay sections
+- Possibly a `section` field on `raw_items` to route items to the right page
+- Or filter by source domain at query time
+
+### RSS Feed Evolution
+- Currently: one feed at `/api/rss` in EN
+- Should become per-section feeds: `/api/rss/world`, `/api/rss/uruguay`, `/api/rss/celeste`
+- Per-language variants: `/api/rss/celeste/en` and `/api/rss/celeste/es` (or `?lang=es` param)
+- Keep `/api/rss` as alias for backwards compat (Feedly subscribers)
 
 ---
 
 ## Key Technical Decisions
 
-- **Prisma 7** — requires driver adapter; using `PrismaNeon` from `@prisma/adapter-neon`
-- **`db.ts`** imports from `@/generated/prisma/client`
-- **`.env.local`** — `tsx` loads it via `--env-file .env.local` flag
-- **Gemini model: `gemini-3.1-flash-lite`** — `gemini-2.0-flash` has zero free tier quota on this account (limit: 0). `gemini-3.1-flash-lite` has 15 RPM / 250K TPM / 500 RPD free tier.
-- **Cron secret**: Vercel sends as `Authorization: Bearer <secret>` — route checks `request.headers.get('authorization')`
-- **Montevideo Portal export name**: `ingestMontevideo` (not `ingestMontevideoPortal`)
-- **Font**: Inter via `next/font/google`, variable `--font-inter`, wired directly in `globals.css` body rule
-- **Dark mode**: forced via `dark` class on `<html>` in layout.tsx
-- **Vercel build**: `prisma generate && next build` — Prisma client is gitignored, must be generated at build time
-- **DEP0169 warning**: `url.parse()` deprecation from transitive dep (`rss-parser`). Harmless, can't fix without upstream change.
-- **RSS site URL**: derived from `new URL(request.url).origin` — no env var needed
-- **Feed layout**: CSS `columns` for masonry (no extra deps). Badge colours: AUF=sky-900/sky-300, MercoPress=indigo-900/70+indigo-400, Montevideo Portal=teal-900/teal-300
+- **Prisma 7 non-interactive migrations**: use `prisma db push --accept-data-loss`, NOT `migrate dev`
+- **`PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION`**: real Prisma env var for AI agent consent — but still needs `--accept-data-loss` flag for non-interactive env
+- **Geist font**: nono.sh uses GeistMono for everything — display headings, body, UI. Import `Geist` (sans) AND `Geist_Mono` from `next/font/google`
+- **`currentColor` on Logo SVGs**: makes logo inherit text colour from context — works with both dark/light themes
+- **Gemini 500 errors**: transient rate limiting, not content failures. Items marked `processed = false` — cron retries. Run orchestrator multiple times to drain backlog.
+- **Gemini model**: `gemini-3.1-flash-lite` — `gemini-2.0-flash` has zero free tier quota on this account
+- **Prisma client location**: `src/generated/prisma` — must run `prisma generate` after schema changes AND restart dev server (Turbopack caches old client)
 
-## Scraper Details
+---
 
-- **AUF** (`https://www.auf.org.uy/mayores/`) — `article.tarjeta`, title from `hgroup > h3 > a`, date from `hgroup > h4`, body from first `p`. URL relative, prepend `https://www.auf.org.uy`. iso-8859-1 via `TextDecoder`.
-- **Montevideo Portal** (`https://www.montevideo.com.uy/categoria/Deportes-94`) — `article.noticia`, title from `.content h2.title`, body from `.content p.text`, URL from `a.foto` href. No date — `publishedAt` null.
-- **MercoPress** — RSS feed, standard `rss-parser` fields. Uses Node `http` module directly so doesn't appear in Vercel external API log (but works fine).
+## File Structure (key files)
+
+```
+src/app/layout.tsx              — ThemeProvider, LangProvider, SiteNav, fonts
+src/app/page.tsx                — Home (la celeste feed, currently at /)
+src/app/world/page.tsx          — Stub
+src/app/uruguay/page.tsx        — Stub
+src/app/nono-theme.css          — Design tokens (source of truth for colours)
+src/app/globals.css             — Imports nono-theme.css, removes ShadCN defaults
+src/components/SiteNav.tsx      — Navbar with nav links + lang/theme toggles
+src/components/FeedClient.tsx   — Client component for masonry feed
+src/components/LangProvider.tsx — EN/ES context
+src/components/LangToggle.tsx   — EN/ES toggle buttons
+src/components/Subtitle.tsx     — Language-aware subtitle
+src/components/Logo.tsx         — SVG logo, uses currentColor
+src/components/nono/            — Nono design system components
+src/lib/ai/filter.ts            — Gemini filter, returns bilingual fields
+src/lib/process.ts              — Orchestrator
+src/scripts/reset-processed.ts  — Utility: clears processed_items, resets raw flags
+```
 
 ---
 
 ## npm Scripts
 
 ```
-npm run dev           # local dev server
-npm run test:ingest   # test MercoPress ingest
-npm run test:scrapers # test AUF + Montevideo Portal scrapers
-npm run test:filter   # test Gemini filter against 5 DB items
-npm run test:process  # run full orchestrator against all unprocessed items
+npm run dev
+npm run test:ingest
+npm run test:scrapers
+npm run test:filter
+npm run test:process      ← also used to manually reprocess items
 ```
 
 ---
@@ -83,30 +135,9 @@ npm run test:process  # run full orchestrator against all unprocessed items
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 16 (App Router, TypeScript) |
-| Styling | Tailwind v4 + Shadcn/ui, Inter font, dark mode |
-| DB | Neon (Postgres, free tier) |
+| Styling | Tailwind v4 + Shadcn/ui + nono-theme.css, GeistMono, dark/light |
+| DB | Neon (Postgres) |
 | ORM | Prisma 7 + `@prisma/adapter-neon` |
-| AI | Gemini `gemini-3.1-flash-lite` via `@google/genai` |
+| AI | Gemini `gemini-3.1-flash-lite` |
 | Cron | Vercel cron (daily 07:00 UTC) |
-| Node | v22.22.2 |
-
----
-
-## Neon Connection
-
-- Project: `noisegate` (ID: `still-butterfly-14962380`)
-- Host: `ep-royal-sun-akfkaz66-pooler.c-3.us-west-2.aws.neon.tech`
-- DB: `neondb`, user: `neondb_owner`
-- Connection string in `.env.local` as `DATABASE_URL`
-
----
-
-## User Preferences
-
-- Hold position when confident — user argues to get convinced, not to shut down discussion
-- No sycophantic agreement when wrong
-- Terse responses, no trailing summaries
-- Ask before cascading changes across multiple files
-- One decision at a time when unblocking errors
-- No speculation presented as fact
-- Never trust working files (checkpoints, notes) for facts — always verify from authoritative source
+| Hosting | Vercel |

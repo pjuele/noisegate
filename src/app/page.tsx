@@ -35,7 +35,7 @@ export default async function Home() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-16">
       <div className="mb-20 text-center">
-        <h1 className="font-mono font-normal tracking-tighter leading-none text-[10rem] mb-8">
+        <h1 className="font-mono font-normal tracking-tighter leading-none text-[3rem] sm:text-[5rem] md:text-[8rem] lg:text-[10rem] mb-8">
           celeste
         </h1>
         <Subtitle />

@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     take: 50,
     include: {
       rawItem: {
-        select: { title: true, url: true, source: true, publishedAt: true, fetchedAt: true },
+        select: { url: true, source: true, publishedAt: true, fetchedAt: true },
       },
     },
   })
@@ -33,9 +33,9 @@ export async function GET(request: Request) {
   const itemsXml = items
     .map((item) => {
       const pubDate = (item.rawItem.publishedAt ?? item.rawItem.fetchedAt).toUTCString()
-      const title = escapeXml(item.rawItem.title)
+      const title = escapeXml(item.titleEn ?? item.titleEs ?? '')
       const url = escapeXml(item.rawItem.url)
-      const summary = escapeXml(item.summary ?? '')
+      const summary = escapeXml(item.summaryEn ?? '')
       return `    <item>
       <title>${title}</title>
       <link>${url}</link>

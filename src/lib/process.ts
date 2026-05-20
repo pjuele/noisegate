@@ -25,7 +25,10 @@ export async function processUnprocessedItems(): Promise<ProcessResult> {
         data: {
           rawItemId: item.id,
           isSignal: result.is_signal,
-          summary: result.summary,
+          titleEn: result.title_en,
+          titleEs: result.title_es,
+          summaryEn: result.summary_en,
+          summaryEs: result.summary_es,
         },
       })
 

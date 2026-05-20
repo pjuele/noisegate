@@ -27,7 +27,10 @@ model ProcessedItem {
   id          String   @id @default(uuid())
   rawItemId   String   @unique
   isSignal    Boolean
-  summary     String?
+  titleEn     String?
+  titleEs     String?
+  summaryEn   String?
+  summaryEs   String?
   processedAt DateTime @default(now())
 
   rawItem RawItem @relation(fields: [rawItemId], references: [id])

@@ -1,4 +1,4 @@
-const BRAND_COLOR = '#84d8ea'
+const BRAND_COLOR = 'currentColor'
 
 const SYMBOL_PATHS = (
   <>

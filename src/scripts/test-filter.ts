@@ -20,7 +20,8 @@ async function main() {
     try {
       const result = await filterItem(item)
       console.log(`  is_signal: ${result.is_signal}`)
-      if (result.summary) console.log(`  summary:   ${result.summary}`)
+      if (result.summary_en) console.log(`  summary_en: ${result.summary_en}`)
+      if (result.summary_es) console.log(`  summary_es: ${result.summary_es}`)
     } catch (err) {
       console.error(`  ERROR: ${err}`)
     }

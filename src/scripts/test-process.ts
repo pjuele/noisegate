@@ -30,7 +30,8 @@ async function main() {
     console.log('\nSignal items:')
     for (const s of signals) {
       console.log(`  [${s.rawItem.source}] ${s.rawItem.title}`)
-      console.log(`    ${s.summary}`)
+      console.log(`    EN: ${s.summaryEn}`)
+      console.log(`    ES: ${s.summaryEs}`)
     }
   }
 

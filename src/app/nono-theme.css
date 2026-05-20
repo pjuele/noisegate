@@ -1,0 +1,132 @@
+/*
+ * nono-theme.css
+ * Authoritative design tokens for the nono.sh aesthetic.
+ * Source: https://nono.sh — analyzed 2026-05-15.
+ *
+ * This file overrides ShadCN's default tokens. Import it AFTER
+ * ShadCN's globals in globals.css so the cascade gives it priority.
+ *
+ * Do not edit globals.css for theme changes — edit this file only.
+ */
+
+/* ─── Light theme ─────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --background:           oklch(98.2% 0.0326 268.7);   /* #f9f9f7 warm off-white */
+  --background-secondary: oklch(98.5% 0.0342 270.0);   /* #fafafa */
+  --card:                 oklch(98.2% 0.0326 268.7);
+  --card-foreground:      oklch(21.8% 0.0076 270.0);
+  --popover:              oklch(98.2% 0.0326 268.7);
+  --popover-foreground:   oklch(21.8% 0.0076 270.0);
+
+  /* Text */
+  --foreground:           oklch(21.8% 0.0076 270.0);   /* #1a1a1a */
+  --muted:                oklch(95.5% 0.0316 268.6);   /* #f0f0ee — used as muted bg */
+  --muted-foreground:     oklch(62.7% 0.0217 270.0);   /* #888 */
+
+  /* Accent — terracotta orange, the only brand color */
+  --primary:              oklch(68.5% 0.1250 16.4);    /* #e8734a */
+  --primary-foreground:   oklch(100.0% 0 0);           /* white */
+  --accent:               oklch(68.5% 0.1250 16.4);    /* #e8734a */
+  --accent-foreground:    oklch(100.0% 0 0);
+
+  /* Secondary — neutral surface */
+  --secondary:            oklch(95.5% 0.0316 268.6);   /* #f0f0ee */
+  --secondary-foreground: oklch(21.8% 0.0076 270.0);
+
+  /* Borders & inputs */
+  --border:               oklch(21.8% 0.0076 270.0 / 10%);  /* #0000001a */
+  --input:                oklch(21.8% 0.0076 270.0 / 10%);
+  --ring:                 oklch(68.5% 0.1250 16.4 / 30%);   /* accent at 30% */
+
+  /* Destructive — kept from ShadCN default */
+  --destructive:          oklch(0.577 0.245 27.325);
+
+  /* Radius — sharp corners everywhere */
+  --radius: 0rem;
+
+  /* ── Nono-specific extras (not ShadCN standard) ── */
+  --nono-surface:         oklch(21.8% 0.0076 270.0 / 2%);   /* #00000005 */
+  --nono-surface-hover:   oklch(21.8% 0.0076 270.0 / 4%);   /* #0000000a */
+  --nono-border-strong:   oklch(21.8% 0.0076 270.0 / 20%);  /* #0003 */
+  --nono-muted-strong:    oklch(45.0% 0.0156 270.0);         /* #555 */
+  --nono-accent-glow:     oklch(68.5% 0.1250 16.4 / 8%);    /* #e8734a14 */
+  --nono-accent-hover:    oklch(62.9% 0.1247 16.7);          /* #d4623b */
+  --nono-code-bg:         oklch(95.5% 0.0316 268.6);         /* #f0f0ee */
+  --nono-code-text:       oklch(21.8% 0.0076 270.0);         /* #1a1a1a */
+  --nono-terminal-bg:     oklch(21.8% 0.0076 270.0);         /* #1a1a1a */
+  --nono-terminal-text:   oklch(87.0% 0.0302 270.0);         /* #d4d4d4 */
+  --nono-selection-bg:    oklch(68.5% 0.1250 16.4 / 20%);   /* #e8734a33 */
+}
+
+/* ─── Dark theme ──────────────────────────────────────────────── */
+.dark {
+  /* Backgrounds */
+  --background:           oklch(17.7% 0.0051 263.4);   /* #111110 */
+  --background-secondary: oklch(21.3% 0.0063 265.0);   /* #191918 */
+  --card:                 oklch(21.3% 0.0063 265.0);
+  --card-foreground:      oklch(93.1% 0.0323 270.0);
+  --popover:              oklch(21.3% 0.0063 265.0);
+  --popover-foreground:   oklch(93.1% 0.0323 270.0);
+
+  /* Text */
+  --foreground:           oklch(93.1% 0.0323 270.0);   /* #e8e8e8 */
+  --muted:                oklch(21.3% 0.0063 265.0);   /* #191918 */
+  --muted-foreground:     oklch(62.7% 0.0217 270.0);   /* #888 — same both themes */
+
+  /* Accent */
+  --primary:              oklch(68.5% 0.1250 16.4);    /* #e8734a — same both themes */
+  --primary-foreground:   oklch(100.0% 0 0);
+  --accent:               oklch(68.5% 0.1250 16.4);
+  --accent-foreground:    oklch(100.0% 0 0);
+
+  /* Secondary */
+  --secondary:            oklch(21.3% 0.0063 265.0);   /* #191918 */
+  --secondary-foreground: oklch(93.1% 0.0323 270.0);
+
+  /* Borders & inputs */
+  --border:               oklch(100% 0 0 / 10%);       /* #ffffff1a */
+  --input:                oklch(100% 0 0 / 15%);
+  --ring:                 oklch(68.5% 0.1250 16.4 / 30%);
+
+  /* Destructive */
+  --destructive:          oklch(0.704 0.191 22.216);
+
+  /* ── Nono-specific extras ── */
+  --nono-surface:         oklch(100% 0 0 / 3%);        /* #ffffff08 */
+  --nono-surface-hover:   oklch(100% 0 0 / 6%);        /* #ffffff0f */
+  --nono-border-strong:   oklch(100% 0 0 / 20%);       /* #fff3 */
+  --nono-muted-strong:    oklch(73.8% 0.0256 270.0);   /* #aaa */
+  --nono-accent-glow:     oklch(68.5% 0.1250 16.4 / 12%); /* #e8734a1f */
+  --nono-accent-hover:    oklch(72.5% 0.1132 15.0);    /* #f0845e */
+  --nono-code-bg:         oklch(14.5% 0.0050 270.0);   /* #0a0a0a */
+  --nono-code-text:       oklch(87.0% 0.0302 270.0);   /* #d4d4d4 */
+  --nono-terminal-bg:     oklch(14.5% 0.0050 270.0);   /* #0a0a0a */
+  --nono-terminal-text:   oklch(87.0% 0.0302 270.0);   /* #d4d4d4 */
+  --nono-selection-bg:    oklch(68.5% 0.1250 16.4 / 30%); /* #e8734a4d */
+}
+
+/* ─── Base overrides ──────────────────────────────────────────── */
+@layer base {
+  body {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background-color: var(--nono-selection-bg);
+  }
+
+  /* Force sharp corners globally — ShadCN Nova hardcodes rounded-* classes
+     that don't respond to --radius: 0, so we override with CSS directly. */
+  *,
+  *::before,
+  *::after {
+    border-radius: 0 !important;
+  }
+
+  /* Restore only avatar/circular elements */
+  .rounded-full {
+    border-radius: 9999px !important;
+  }
+}

@@ -3,7 +3,10 @@ import type { RawItem } from '@/generated/prisma/client'
 
 export type FilterResult = {
   is_signal: boolean
-  summary: string | null
+  title_en: string | null
+  title_es: string | null
+  summary_en: string | null
+  summary_es: string | null
 }
 
 const SIGNAL_CRITERIA =
@@ -14,14 +17,19 @@ const NOISE_CRITERIA =
 
 const SYSTEM_PROMPT = `You are a sports news classifier for a Uruguay national football team tracker.
 
-Classify each article as either SIGNAL or NOISE:
+Step 1 — Classify the article as SIGNAL or NOISE:
 - SIGNAL: ${SIGNAL_CRITERIA}
 - NOISE: ${NOISE_CRITERIA}
 
-Respond with valid JSON only, no markdown, no explanation. Format:
-{"is_signal": true, "summary": "2-3 line English summary of the factual update"}
-or
-{"is_signal": false, "summary": null}`
+Step 2 — Only if SIGNAL: translate the title and write a 2-3 line factual summary in both English and Spanish.
+
+Respond with valid JSON only, no markdown, no explanation.
+
+If SIGNAL:
+{"is_signal": true, "title_en": "English title", "title_es": "Spanish title", "summary_en": "2-3 line English summary", "summary_es": "2-3 line Spanish summary"}
+
+If NOISE:
+{"is_signal": false, "title_en": null, "title_es": null, "summary_en": null, "summary_es": null}`
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
@@ -45,7 +53,6 @@ export async function filterItem(item: RawItem): Promise<FilterResult> {
   })
 
   const text = response.text?.trim() ?? ''
-
   const parsed = JSON.parse(text) as FilterResult
   return parsed
 }

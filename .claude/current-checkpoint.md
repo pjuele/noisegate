@@ -2,7 +2,7 @@
 
 ## Session Summary
 
-POC 1.0 is complete and deployed to Vercel. Cron is confirmed working — ran successfully on May 15, ingested from all 3 sources, processed via Gemini, signal items showing on feed. CRON_SECRET was missing from Vercel env vars (now fixed). Two tasks remain: RSS feed endpoint and Task 8 styling. Starting RSS next.
+POC 1.0 is complete. All planned tasks done: pipeline, cron, feed, RSS endpoint, styling. Feed has masonry card layout, coloured source badges, responsive columns. RSS confirmed working in Feedly. One uncommitted change pending: the feed redesign (`page.tsx`).
 
 ---
 
@@ -17,29 +17,29 @@ POC 1.0 is complete and deployed to Vercel. Cron is confirmed working — ran su
 - [x] `src/lib/process.ts` — orchestrator
 - [x] `src/app/api/cron/ingest/route.ts` — cron route, `Authorization: Bearer <CRON_SECRET>`
 - [x] `vercel.json` — cron schedule `0 7 * * *`
-- [x] `src/app/page.tsx` — frontend feed, dark mode, Inter font, ℹ️ capture date tooltip
 - [x] `build` script: `prisma generate && next build`
 - [x] README rewritten, boilerplate SVGs removed
 - [x] Deployed to Vercel — cron confirmed working
 - [x] Logo components: `NoiseGateSymbol`, `NoiseGateWordmark`, `NoiseGateSlogan`, `NoiseGateLogo` in `src/components/Logo.tsx`
 - [x] `public/favicon.svg` using the symbol mark
 - [x] `CRON_SECRET` added to Vercel environment variables
+- [x] `src/app/api/rss/route.ts` — RSS 2.0 feed, site URL derived from `request.url` origin, up to 50 items
+- [x] RSS confirmed working in Feedly
+- [x] Feed redesigned: masonry CSS columns (1/2/3), cards, coloured source badges
 
 ## Uncommitted Changes
 
-- `src/components/Logo.tsx` — new file
-- `public/favicon.svg` — new file
-- `src/app/page.tsx` — uses `NoiseGateLogo`, capture date tooltip
-- `src/app/layout.tsx` — favicon metadata
-- `src/app/favicon.ico` — deleted
-- `.claude/current-checkpoint.md` — updated
+- `src/app/page.tsx` — masonry card layout + coloured badges (commit message ready)
 
 ---
 
 ## Next Up
 
-1. **RSS feed** — `/api/rss` route returning RSS/Atom XML of signal items. ~20 min.
-2. **Task 8 — Styling** — distinct source badge colours, mobile check, optional cards. ~1 hour.
+POC 1.0 is done. Let the daily cron accumulate data.
+
+**Potential next phases (from brief):**
+- **POC 1.1** — deduplication/synthesis across sources, additional sources (Portal 180, El Observador/Referí)
+- **POC 2.0** — Uruguay Tracker: player/squad DB, persistent team briefing card, history/timelines
 
 ---
 
@@ -55,6 +55,8 @@ POC 1.0 is complete and deployed to Vercel. Cron is confirmed working — ran su
 - **Dark mode**: forced via `dark` class on `<html>` in layout.tsx
 - **Vercel build**: `prisma generate && next build` — Prisma client is gitignored, must be generated at build time
 - **DEP0169 warning**: `url.parse()` deprecation from transitive dep (`rss-parser`). Harmless, can't fix without upstream change.
+- **RSS site URL**: derived from `new URL(request.url).origin` — no env var needed
+- **Feed layout**: CSS `columns` for masonry (no extra deps). Badge colours: AUF=sky-900/sky-300, MercoPress=indigo-900/70+indigo-400, Montevideo Portal=teal-900/teal-300
 
 ## Scraper Details
 
@@ -107,3 +109,4 @@ npm run test:process  # run full orchestrator against all unprocessed items
 - Ask before cascading changes across multiple files
 - One decision at a time when unblocking errors
 - No speculation presented as fact
+- Never trust working files (checkpoints, notes) for facts — always verify from authoritative source
